@@ -22,7 +22,16 @@ class GeminiService {
   }
 
   Future<Map<String, dynamic>> identifyPlant(Uint8List imageBytes, String filename) async {
-    String? apiError;
+    // 1. Attempt local data lookup first (Manual Override)
+    try {
+      final localData = await _loadLocalData(filename);
+      print('Local data found for "$filename". Skipping API call.');
+      return localData;
+    } catch (e) {
+      print('No local data for "$filename" (or error loading): $e. Proceeding to Gemini API.');
+    }
+
+    // 2. Call Gemini API if local data isn't found
     try {
       final prompt = 'Identify this plant. Return a JSON object with strictly these keys: '
           '"commonName", "scientificName", and "funFact". '
@@ -43,17 +52,9 @@ class GeminiService {
       }
 
       return jsonDecode(responseText) as Map<String, dynamic>;
-    } catch (e) {
-      apiError = e.toString();
+    } catch (apiError) {
       print('Gemini API Error: $apiError');
-    }
-
-    // Attempt fallback to local data
-    try {
-      return await _loadLocalData(filename);
-    } catch (fallbackError) {
-      // If even fallback fails, throw the original API error combined with fallback failure
-      throw Exception('API Error: $apiError\n\nLocal Fallback Error: $fallbackError');
+      throw Exception('Failed to identify plant via local database or Gemini API.\n\nAPI Error: $apiError');
     }
   }
 

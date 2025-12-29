@@ -3,5 +3,30 @@
         "commonName": "Bottle Gourd",
         "scientificName": "Lagenaria siceraria",
         "funFact": "Used to make musical instruments!."
+    },
+    "black_eyed_susan.jpg": {
+        "commonName": "Black-eyed Susan",
+        "scientificName": "Rudbeckia hirta",
+        "funFact": "It is the state flower of Maryland and symbolizes encouragement."
+    },
+    "common_sunflower.jpg": {
+        "commonName": "Common Sunflower",
+        "scientificName": "Helianthus annuus",
+        "funFact": "Sunflowers are hyperaccumulators, meaning they can pull toxins like lead and arsenic from the soil."
+    },
+    "hardy_fuchsia.jpg": {
+        "commonName": "Hardy Fuchsia",
+        "scientificName": "Fuchsia magellanica",
+        "funFact": "Named after 16th-century German botanist Leonhart Fuchs."
+    },
+    "autumn_crocus.jpg": {
+        "commonName": "Autumn Crocus",
+        "scientificName": "Colchicum autumnale",
+        "funFact": "Despite the name, it is not a true crocus and is actually a member of the lily family."
+    },
+    "scarlet_sage.jpg": {
+        "commonName": "Scarlet Sage",
+        "scientificName": "Salvia splendens",
+        "funFact": "This plant is a favorite of hummingbirds due to its nectar-rich, tubular red flowers."
     }
 }
