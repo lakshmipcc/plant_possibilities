@@ -1,11 +1,11 @@
 {
-    "name": "plant_possibilities",
-    "short_name": "plant_possibilities",
+    "name": "Plant Possibilities",
+    "short_name": "PlantPoss",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#F5F5DC",
+    "theme_color": "#8A9A5B",
+    "description": "Discover your garden's potential with AI-powered plant identification.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
