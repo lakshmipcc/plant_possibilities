@@ -20,7 +20,7 @@ jobs:
       - name: Build Web
         run: |
           flutter pub get
-          flutter build web --base-href "/plant_possibilities/" --no-tree-shake-icons
+          flutter build web --base-href "/plant_possibilities/" --no-tree-shake-icons --dart-define=GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3

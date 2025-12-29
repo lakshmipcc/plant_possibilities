@@ -8,12 +8,22 @@ class GeminiService {
   late final String _apiKey;
 
   GeminiService() {
-    final apiKey = dotenv.env['GEMINI_API_KEY']?.trim();
-    _apiKey = apiKey;
-    final maskedKey = "${_apiKey.substring(0, 5)}...${_apiKey.substring(_apiKey.length - 4)}";
-    print('DEBUG: [Gemini Service] Initialized with Key: $maskedKey');
+    // Priority 1: Check for --dart-define=GEMINI_API_KEY=xxx
+    // Priority 2: Check for .env file (for local testing)
+    String? apiKey = const String.fromEnvironment('GEMINI_API_KEY');
     
-    // Default model
+    if (apiKey.isEmpty) {
+      apiKey = dotenv.env['GEMINI_API_KEY']?.trim();
+    }
+
+    if (apiKey == null || apiKey.isEmpty) {
+      // We don't throw here to allow the UI to load, but we log the warning
+      print('WARNING: GEMINI_API_KEY not found in environment or .env');
+      _apiKey = '';
+    } else {
+      _apiKey = apiKey;
+    }
+    
     _model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: _apiKey);
   }
 
@@ -29,10 +39,10 @@ class GeminiService {
 
     // 2. Try Gemini Models with Fallback
     final List<String> modelNames = [
-      'gemini-1.5-flash', 
-      'gemini-1.5-pro',
-      'gemini-pro',
-      'gemini-1.0-pro'
+      'gemini-flash-latest', 
+      'gemini-2.0-flash',
+      'gemini-2.5-flash',
+      'gemini-pro-latest'
     ];
     Object? lastError;
 
