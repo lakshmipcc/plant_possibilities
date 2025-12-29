@@ -21,6 +21,12 @@ Discover your plant's potential! **Plant Possibilities** is a beautiful, respons
 - **Camera**: [image_picker](https://pub.dev/packages/image_picker)
 - **Deployment**: [GitHub Actions](https://github.com/features/actions)
 
+## 📊 Usage & Quotas (Free Tier)
+This app uses the Gemini API Free Tier with the following approximate limits:
+- **Daily Scans**: ~1,500 plants/day (Gemini 1.5 Flash).
+- **Simultaneous Users**: Up to 15 requests per minute.
+- **Cost**: $0.00 (Completely free for personal and hobby use).
+
 ## 🚀 Getting Started
 
 ### 1. Prerequisites
