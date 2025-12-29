@@ -6,7 +6,14 @@ import 'gemini_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: "assets/.env");
+  final String sessionID = 'SESSION_${DateTime.now().millisecondsSinceEpoch}';
+  print('DEBUG: App Starting. [$sessionID]');
+  try {
+    await dotenv.load(fileName: "assets/.env");
+    print('DEBUG: .env load sequence finished.');
+  } catch (e) {
+    print('DEBUG: .env FATAL ERROR: $e');
+  }
   runApp(const PlantPossApp());
 }
 
@@ -41,7 +48,7 @@ class PlantPossApp extends StatelessWidget {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Plant Possibilities',
+      title: 'Plant Possibilities v2.2',
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
@@ -110,9 +117,27 @@ class _LandingPageState extends State<LandingPage> {
         });
       }
     } catch (e) {
+      print('APP ERROR: $e'); // Log to console for terminal debugging
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
+          SnackBar(
+            content: Text('Failed to Identify: ${e.toString()}'),
+            backgroundColor: Colors.redAccent,
+            duration: const Duration(seconds: 8),
+            action: SnackBarAction(
+              label: 'Details',
+              textColor: Colors.white,
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('Error Details'),
+                    content: Text(e.toString()),
+                  ),
+                );
+              },
+            ),
+          ),
         );
       }
     } finally {
@@ -128,7 +153,15 @@ class _LandingPageState extends State<LandingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Plant Possibilities'),
+        title: Column(
+          children: [
+            const Text('Plant Possibilities'),
+            Text(
+              'v2.5 (Build: ${DateTime.now().toIso8601String().substring(0, 16)})',
+              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal),
+            ),
+          ],
+        ),
         centerTitle: true,
       ),
       body: LayoutBuilder(
