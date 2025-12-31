@@ -199,9 +199,44 @@ class _LandingPageState extends State<LandingPage> {
         title: Column(
           children: [
             const Text('Plant Possibilities'),
-            Text(
-              'v3.8 (Key Doctor) - ${DateTime.now().toIso8601String().substring(0, 16)}',
-              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal),
+            GestureDetector(
+              onDoubleTap: () {
+                TextEditingController keyController = TextEditingController();
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('Manual Key Override'),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text('Enter API Key directly to bypass connection issues:'),
+                        TextField(
+                          controller: keyController,
+                          decoration: const InputDecoration(hintText: 'Paste AIza... key here'),
+                        ),
+                      ],
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          if (keyController.text.isNotEmpty) {
+                            _geminiService.setApiKey(keyController.text);
+                            Navigator.of(ctx).pop();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Key Updated! Try scanning again.')),
+                            );
+                          }
+                        },
+                        child: const Text('Save'),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              child: Text(
+                'v3.9 (Manual Override) - ${DateTime.now().toIso8601String().substring(0, 16)}',
+                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal),
+              ),
             ),
           ],
         ),

@@ -10,8 +10,13 @@ class GeminiService {
 
   GeminiService(); // Empty constructor to prevent startup crashes
 
+  void setApiKey(String key) {
+    _apiKey = key.trim();
+    print('DEBUG: API Key manually overridden. Length: ${_apiKey.length}');
+  }
+
   void _ensureInitialized() {
-    if (_apiKey.isNotEmpty) return; // Already initialized
+    if (_apiKey.isNotEmpty && _apiKey != 'MISSING_KEY') return; // Already initialized
 
     // Priority 1: Check for --dart-define=GEMINI_API_KEY=xxx (Obfuscated or Raw)
     String? envKey = const String.fromEnvironment('GEMINI_API_KEY');
@@ -22,8 +27,8 @@ class GeminiService {
     }
 
     if (envKey.isEmpty) {
-      print('WARNING: GEMINI_API_KEY not found in environment or .env');
-      _apiKey = 'MISSING_KEY'; // Placeholder to prevent empty checks looping
+      print('WARNING: GEMINI_API_KEY not found');
+      _apiKey = 'MISSING_KEY'; 
     } else {
       // Simple heuristic: If it doesn't start with "AIza", it might be Base64 encoded.
       if (!envKey.startsWith('AIza')) {
@@ -34,13 +39,13 @@ class GeminiService {
           _apiKey = String.fromCharCodes(decoded.runes.toList().reversed);
           
           if (!_apiKey.startsWith('AIza')) {
-             throw FormatException('Decoded key does not start with AIza. Result: ${_apiKey.substring(0, min(4, _apiKey.length))}...');
+             throw FormatException('Decoded key start invalid. Raw Env Length: ${envKey.length}');
           }
           
-          print('DEBUG: Decoded & Reversed API Key. First 4 chars: ${_apiKey.substring(0, min(4, _apiKey.length))}');
+          print('DEBUG: Decoded API Key.');
         } catch (e) {
           print('WARNING: Key Decoding Failed: $e');
-          // Important: We THROW here so the UI sees "Invalid Key Format" instead of trying to use a garbage key
+          // Important: We THROW here so the UI sees "Invalid Key Format"
           throw Exception('Key Decoding Failed: $e');
         }
       } else {
