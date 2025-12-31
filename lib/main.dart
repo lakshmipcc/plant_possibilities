@@ -236,7 +236,7 @@ class _LandingPageState extends State<LandingPage> {
                 );
               },
               child: Text(
-                'v4.0 (Saved Key) - ${DateTime.now().toIso8601String().substring(0, 16)}',
+                'v5.0 (Seamless) - ${DateTime.now().toIso8601String().substring(0, 16)}',
                 style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal),
               ),
             ),

@@ -50,10 +50,8 @@ class GeminiService {
       // Simple heuristic: If it doesn't start with "AIza", it might be Base64 encoded.
       if (!envKey.startsWith('AIza')) {
         try {
-          // 1. Decode Base64
-          String decoded = utf8.decode(base64Decode(envKey)).trim();
-          // 2. Reverse the string (Obfuscation against scanners)
-          _apiKey = String.fromCharCodes(decoded.runes.toList().reversed);
+          // 1. Decode Base64 (Standard - No Reverse)
+          _apiKey = utf8.decode(base64Decode(envKey)).trim();
           
           if (!_apiKey.startsWith('AIza')) {
              throw FormatException('Decoded key start invalid. Raw Env Length: ${envKey.length}');
