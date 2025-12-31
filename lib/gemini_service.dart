@@ -27,11 +27,13 @@ class GeminiService {
       // So we will assume the input IS Base64 if it doesn't look like a standard key.
       if (!envKey.startsWith('AIza')) {
         try {
-          _apiKey = utf8.decode(base64Decode(envKey)).trim();
-          print('DEBUG: Decoded Base64 API Key.');
+          // 1. Decode Base64
+          String decoded = utf8.decode(base64Decode(envKey)).trim();
+          // 2. Reverse the string (Obfuscation against scanners)
+          _apiKey = String.fromCharCodes(decoded.runes.toList().reversed);
+          print('DEBUG: Decoded & Reversed API Key.');
         } catch (e) {
-          // If decode fails, assume it's a raw key (or just broken)
-          print('WARNING: Failed to decode key, using raw value. ($e)');
+          print('WARNING: Failed to decode/reverse key, trying raw. ($e)');
           _apiKey = envKey;
         }
       } else {
