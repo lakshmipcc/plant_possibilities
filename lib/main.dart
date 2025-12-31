@@ -218,23 +218,25 @@ class _LandingPageState extends State<LandingPage> {
                     ),
                     actions: [
                       TextButton(
-                        onPressed: () {
+                        onPressed: () async {
                           if (keyController.text.isNotEmpty) {
-                            _geminiService.setApiKey(keyController.text);
-                            Navigator.of(ctx).pop();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Key Updated! Try scanning again.')),
-                            );
+                            await _geminiService.setApiKey(keyController.text);
+                            if (context.mounted) {
+                              Navigator.of(ctx).pop();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Key Saved! It will be remembered on this device.')),
+                              );
+                            }
                           }
                         },
-                        child: const Text('Save'),
+                        child: const Text('Save & Remember'),
                       ),
                     ],
                   ),
                 );
               },
               child: Text(
-                'v3.9 (Manual Override) - ${DateTime.now().toIso8601String().substring(0, 16)}',
+                'v4.0 (Saved Key) - ${DateTime.now().toIso8601String().substring(0, 16)}',
                 style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal),
               ),
             ),

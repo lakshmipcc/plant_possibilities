@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class GeminiService {
   GenerativeModel? _model;
@@ -10,18 +11,34 @@ class GeminiService {
 
   GeminiService(); // Empty constructor to prevent startup crashes
 
-  void setApiKey(String key) {
+  Future<void> setApiKey(String key) async {
     _apiKey = key.trim();
     print('DEBUG: API Key manually overridden. Length: ${_apiKey.length}');
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('saved_api_key', _apiKey);
+    print('DEBUG: Key saved to local storage.');
   }
 
-  void _ensureInitialized() {
+  Future<void> _ensureInitialized() async {
     if (_apiKey.isNotEmpty && _apiKey != 'MISSING_KEY') return; // Already initialized
 
-    // Priority 1: Check for --dart-define=GEMINI_API_KEY=xxx (Obfuscated or Raw)
+    // Priority 1: Check Local Storage (Manual Override Persistence)
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final storedKey = prefs.getString('saved_api_key');
+      if (storedKey != null && storedKey.isNotEmpty) {
+        _apiKey = storedKey;
+        print('DEBUG: Using saved API key from storage.');
+        return;
+      }
+    } catch (e) {
+      print('WARNING: Internal Storage Check Failed: $e');
+    }
+
+    // Priority 2: Check for --dart-define=GEMINI_API_KEY=xxx (Obfuscated or Raw)
     String? envKey = const String.fromEnvironment('GEMINI_API_KEY');
     
-    // Priority 2: Check for .env file (for local testing)
+    // Priority 3: Check for .env file (for local testing)
     if (envKey.isEmpty) {
       envKey = dotenv.env['GEMINI_API_KEY']?.trim() ?? '';
     }
@@ -55,7 +72,7 @@ class GeminiService {
   }
 
   Future<Map<String, dynamic>> identifyPlant(Uint8List imageBytes, String filename) async {
-    _ensureInitialized(); // Lazy Init (Safe)
+    await _ensureInitialized(); // Lazy Init + Sync from Storage (Async)
 
     // 1. Attempt local data lookup first
     try {
