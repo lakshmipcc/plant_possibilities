@@ -14,6 +14,35 @@ void main() async {
   } catch (e) {
     print('DEBUG: .env FATAL ERROR: $e');
   }
+
+  // Global Error Handler for "White Screen of Death"
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    return MaterialApp(
+      home: Scaffold(
+        backgroundColor: Colors.red.shade50,
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 60, color: Colors.red),
+                  const SizedBox(height: 16),
+                  const Text('Examples of App Crash:', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Text(details.exceptionAsString(), textAlign: TextAlign.center),
+                  const SizedBox(height: 16),
+                  Text('Stack Trace (Snippet): ${details.stack.toString().split('\n').take(3).join('\n')}', style: const TextStyle(fontSize: 10)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  };
+
   runApp(const PlantPossApp());
 }
 
@@ -175,7 +204,7 @@ class _LandingPageState extends State<LandingPage> {
           children: [
             const Text('Plant Possibilities'),
             Text(
-              'v3.3 (Lazy Init Fix) - ${DateTime.now().toIso8601String().substring(0, 16)}',
+              'v3.4 (Crash Detection) - ${DateTime.now().toIso8601String().substring(0, 16)}',
               style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal),
             ),
           ],
