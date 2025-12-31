@@ -3,11 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
-class GeminiService {
-  GenerativeModel? _model;
-  String _apiKey = '';
+  GeminiService(); // Empty constructor to prevent startup crashes
 
-  GeminiService() {
+  void _ensureInitialized() {
+    if (_apiKey.isNotEmpty) return; // Already initialized
+
     // Priority 1: Check for --dart-define=GEMINI_API_KEY=xxx (Obfuscated or Raw)
     String? envKey = const String.fromEnvironment('GEMINI_API_KEY');
     
@@ -18,7 +18,7 @@ class GeminiService {
 
     if (envKey.isEmpty) {
       print('WARNING: GEMINI_API_KEY not found in environment or .env');
-      _apiKey = '';
+      _apiKey = 'MISSING_KEY'; // Placeholder to prevent empty checks looping
     } else {
       // Simple heuristic: If it doesn't start with "AIza", it might be Base64 encoded.
       if (!envKey.startsWith('AIza')) {
@@ -27,7 +27,7 @@ class GeminiService {
           String decoded = utf8.decode(base64Decode(envKey)).trim();
           // 2. Reverse the string (Obfuscation against scanners)
           _apiKey = String.fromCharCodes(decoded.runes.toList().reversed);
-          print('DEBUG: Decoded & Reversed API Key. First 4 chars: ${_apiKey.substring(0, 4)}');
+          print('DEBUG: Decoded & Reversed API Key. First 4 chars: ${_apiKey.substring(0, min(4, _apiKey.length))}');
         } catch (e) {
           print('WARNING: Failed to decode/reverse key, trying raw. ($e)');
           _apiKey = envKey;
@@ -36,10 +36,14 @@ class GeminiService {
          _apiKey = envKey;
       }
     }
-    // We defer _model initialization to identifyPlant to prevent startup crashes if key is initially invalid.
   }
 
+  // Helper for safe substring
+  int min(int a, int b) => a < b ? a : b;
+
   Future<Map<String, dynamic>> identifyPlant(Uint8List imageBytes, String filename) async {
+    _ensureInitialized(); // Lazy Init (Safe)
+
     // 1. Attempt local data lookup first
     try {
       final localData = await _loadLocalData(filename);
