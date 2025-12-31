@@ -132,7 +132,25 @@ class _LandingPageState extends State<LandingPage> {
                   context: context,
                   builder: (ctx) => AlertDialog(
                     title: const Text('Error Details'),
-                    content: Text(e.toString()),
+                    content: SingleChildScrollView(
+                      child: ListBody(
+                        children: [
+                          Text('Error: $e'),
+                          const SizedBox(height: 16),
+                          const Divider(),
+                          const Text('Debug Info:', style: TextStyle(fontWeight: FontWeight.bold)),
+                          Text('Time: ${DateTime.now().toIso8601String()}'),
+                          // Note: We don't have access to the raw key here easily without hacking, 
+                          // but this detailed error might contain the API response "API_KEY_EXPIRED".
+                        ],
+                      ),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        child: const Text('Close'),
+                      ),
+                    ],
                   ),
                 );
               },
@@ -157,7 +175,7 @@ class _LandingPageState extends State<LandingPage> {
           children: [
             const Text('Plant Possibilities'),
             Text(
-              'v3.0 (Security Fix) - ${DateTime.now().toIso8601String().substring(0, 16)}',
+              'v3.1 (Key Trim Fix)',
               style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal),
             ),
           ],

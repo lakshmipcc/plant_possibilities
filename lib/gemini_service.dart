@@ -27,7 +27,7 @@ class GeminiService {
       // So we will assume the input IS Base64 if it doesn't look like a standard key.
       if (!envKey.startsWith('AIza')) {
         try {
-          _apiKey = utf8.decode(base64Decode(envKey));
+          _apiKey = utf8.decode(base64Decode(envKey)).trim();
           print('DEBUG: Decoded Base64 API Key.');
         } catch (e) {
           // If decode fails, assume it's a raw key (or just broken)
