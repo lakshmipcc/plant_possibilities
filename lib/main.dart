@@ -200,7 +200,7 @@ class _LandingPageState extends State<LandingPage> {
           children: [
             const Text('Plant Possibilities'),
             Text(
-              'v3.7 (Safe Mode v2) - ${DateTime.now().toIso8601String().substring(0, 16)}',
+              'v3.8 (Key Doctor) - ${DateTime.now().toIso8601String().substring(0, 16)}',
               style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal),
             ),
           ],

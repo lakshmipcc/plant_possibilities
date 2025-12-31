@@ -32,10 +32,16 @@ class GeminiService {
           String decoded = utf8.decode(base64Decode(envKey)).trim();
           // 2. Reverse the string (Obfuscation against scanners)
           _apiKey = String.fromCharCodes(decoded.runes.toList().reversed);
+          
+          if (!_apiKey.startsWith('AIza')) {
+             throw FormatException('Decoded key does not start with AIza. Result: ${_apiKey.substring(0, min(4, _apiKey.length))}...');
+          }
+          
           print('DEBUG: Decoded & Reversed API Key. First 4 chars: ${_apiKey.substring(0, min(4, _apiKey.length))}');
         } catch (e) {
-          print('WARNING: Failed to decode/reverse key, trying raw. ($e)');
-          _apiKey = envKey;
+          print('WARNING: Key Decoding Failed: $e');
+          // Important: We THROW here so the UI sees "Invalid Key Format" instead of trying to use a garbage key
+          throw Exception('Key Decoding Failed: $e');
         }
       } else {
          _apiKey = envKey;
