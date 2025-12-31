@@ -8,12 +8,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final String sessionID = 'SESSION_${DateTime.now().millisecondsSinceEpoch}';
   print('DEBUG: App Starting. [$sessionID]');
-  try {
-    await dotenv.load(fileName: "assets/.env");
-    print('DEBUG: .env load sequence finished.');
-  } catch (e) {
-    print('DEBUG: .env FATAL ERROR: $e');
-  }
+  // dotenv.load removal: This caused FormatException on web when file is 404 (parsing 404 HTML as env)
+  print('DEBUG: App Starting. [$sessionID] - Safe Mode v3.7');
 
   // Global Error Handler for "White Screen of Death"
   ErrorWidget.builder = (FlutterErrorDetails details) {
@@ -204,7 +200,7 @@ class _LandingPageState extends State<LandingPage> {
           children: [
             const Text('Plant Possibilities'),
             Text(
-              'v3.6 (Final Fix) - ${DateTime.now().toIso8601String().substring(0, 16)}',
+              'v3.7 (Safe Mode v2) - ${DateTime.now().toIso8601String().substring(0, 16)}',
               style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal),
             ),
           ],
