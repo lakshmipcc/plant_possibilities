@@ -1,7 +1,12 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+
+class GeminiService {
+  GenerativeModel? _model;
+  String _apiKey = '';
 
   GeminiService(); // Empty constructor to prevent startup crashes
 
@@ -37,9 +42,6 @@ import 'package:google_generative_ai/google_generative_ai.dart';
       }
     }
   }
-
-  // Helper for safe substring
-  int min(int a, int b) => a < b ? a : b;
 
   Future<Map<String, dynamic>> identifyPlant(Uint8List imageBytes, String filename) async {
     _ensureInitialized(); // Lazy Init (Safe)
