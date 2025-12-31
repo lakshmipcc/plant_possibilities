@@ -67113,7 +67113,7 @@ return!0},
 gBm(){return"windows"},
 glJ(){return"\\"}}
 A.U6.prototype={
-Tf(){var s,r,q,p,o=this,n="AIzaSyBh4CIhwFX_ZymAOoNg8iDy10Ae2TECiIA"
+Tf(){var s,r,q,p,o=this,n="QUl6YVN5Qmg0Q0lod0ZYX1p5bUFPb05nOGlEeTEwQWUyVEVDaUlB"
 if(n.length===0){r=$.ah6()
 if(!r.a)A.U(new A.ES())
 r=r.b.i(0,"GEMINI_API_KEY")
@@ -67298,7 +67298,7 @@ break
 case 5:return A.L(null,r)
 case 1:return A.K(p.at(-1),r)}})
 return A.M($async$kG,r)},
-M(a){var s=null,r=A.Rd(A.c([B.Om,A.pD("v2.6 (Build: "+B.c.R(new A.eU(Date.now(),0,!1).a9e(),0,16)+")",B.ND)],t.E),B.at,B.au,B.bc)
+M(a){var s=null,r=A.Rd(A.c([B.Om,A.pD("v3.0 (Security Fix) - "+B.c.R(new A.eU(Date.now(),0,!1).a9e(),0,16),B.ND)],t.E),B.at,B.au,B.bc)
 return new A.wc(new A.rs(r,!0,new A.LJ(s,s,1/0,56),s),A.at9(new A.a8M(this)),s)},
 U6(a){var s=null,r=A.as7(B.B3,B.Oj,new A.a8F(this),A.aii(s,s,s,s,s,s,s,s,s,s,s,a?B.vI:B.vH,s,s,s,s,s,s,s,s)),q=a?B.vI:B.vH
 q=A.atY(s,s,s,s,s,s,s,s,s,B.d3,s,q,B.Ag,s,new A.cj(A.nP(12),B.r),B.x0,s,s,s,s)
