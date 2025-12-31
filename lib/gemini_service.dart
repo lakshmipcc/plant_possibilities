@@ -4,8 +4,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 class GeminiService {
-  late final GenerativeModel _model;
-  late final String _apiKey;
+  GenerativeModel? _model;
+  String _apiKey = '';
 
   GeminiService() {
     // Priority 1: Check for --dart-define=GEMINI_API_KEY=xxx (Obfuscated or Raw)
@@ -21,17 +21,13 @@ class GeminiService {
       _apiKey = '';
     } else {
       // Simple heuristic: If it doesn't start with "AIza", it might be Base64 encoded.
-      // Or we can just try to decode it if it looks like base64.
-      // BUT, to be safe, we'll assume the user might provide either.
-      // However, to defeat the scanner, we WANT the input to NOT look like AIza.
-      // So we will assume the input IS Base64 if it doesn't look like a standard key.
       if (!envKey.startsWith('AIza')) {
         try {
           // 1. Decode Base64
           String decoded = utf8.decode(base64Decode(envKey)).trim();
           // 2. Reverse the string (Obfuscation against scanners)
           _apiKey = String.fromCharCodes(decoded.runes.toList().reversed);
-          print('DEBUG: Decoded & Reversed API Key.');
+          print('DEBUG: Decoded & Reversed API Key. First 4 chars: ${_apiKey.substring(0, 4)}');
         } catch (e) {
           print('WARNING: Failed to decode/reverse key, trying raw. ($e)');
           _apiKey = envKey;
@@ -40,8 +36,7 @@ class GeminiService {
          _apiKey = envKey;
       }
     }
-    
-    _model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: _apiKey);
+    // We defer _model initialization to identifyPlant to prevent startup crashes if key is initially invalid.
   }
 
   Future<Map<String, dynamic>> identifyPlant(Uint8List imageBytes, String filename) async {
@@ -66,6 +61,7 @@ class GeminiService {
     for (final modelName in modelNames) {
       try {
         print('DEBUG: [Gemini AI] Trying model: $modelName');
+        // Lazy initialize or create a new instance per request to support retries if we wanted to swap keys strategies
         final currentModel = GenerativeModel(model: modelName, apiKey: _apiKey);
 
         final prompt = 'Identify this plant and return ONLY a JSON object with: '

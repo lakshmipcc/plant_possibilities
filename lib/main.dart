@@ -175,7 +175,7 @@ class _LandingPageState extends State<LandingPage> {
           children: [
             const Text('Plant Possibilities'),
             Text(
-              'v3.2 (Reversed Key) - ${DateTime.now().toIso8601String().substring(0, 16)}',
+              'v3.3 (Lazy Init Fix) - ${DateTime.now().toIso8601String().substring(0, 16)}',
               style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal),
             ),
           ],
