@@ -27,7 +27,7 @@ class GeminiService {
       final prefs = await SharedPreferences.getInstance();
       final storedKey = prefs.getString('saved_api_key');
       if (storedKey != null && storedKey.isNotEmpty) {
-        _apiKey = storedKey;
+        _apiKey = storedKey.trim();
         print('DEBUG: Using saved API key from storage.');
         return;
       }
@@ -35,37 +35,20 @@ class GeminiService {
       print('WARNING: Internal Storage Check Failed: $e');
     }
 
-    // Priority 2: Check for --dart-define=GEMINI_API_KEY=xxx (Obfuscated or Raw)
-    String? envKey = const String.fromEnvironment('GEMINI_API_KEY');
+    // Priority 2: Check for --dart-define=GEMINI_API_KEY=xxx (Raw key from GitHub)
+    String envKey = const String.fromEnvironment('GEMINI_API_KEY').trim();
     
     // Priority 3: Check for .env file (for local testing)
     if (envKey.isEmpty) {
       envKey = dotenv.env['GEMINI_API_KEY']?.trim() ?? '';
     }
 
-    if (envKey.isEmpty) {
-      print('WARNING: GEMINI_API_KEY not found');
-      _apiKey = 'MISSING_KEY'; 
+    if (envKey.isNotEmpty) {
+      _apiKey = envKey;
+      print('DEBUG: API Key loaded from environment. Starts with: ${_apiKey.substring(0, min(4, _apiKey.length))}');
     } else {
-      // Simple heuristic: If it doesn't start with "AIza", it might be Base64 encoded.
-      if (!envKey.startsWith('AIza')) {
-        try {
-          // 1. Decode Base64 (Standard - No Reverse)
-          _apiKey = utf8.decode(base64Decode(envKey)).trim();
-          
-          if (!_apiKey.startsWith('AIza')) {
-             throw FormatException('Decoded key start invalid. Raw Env Length: ${envKey.length}');
-          }
-          
-          print('DEBUG: Decoded API Key.');
-        } catch (e) {
-          print('WARNING: Key Decoding Failed: $e');
-          // Important: We THROW here so the UI sees "Invalid Key Format"
-          throw Exception('Key Decoding Failed: $e');
-        }
-      } else {
-         _apiKey = envKey;
-      }
+      print('WARNING: GEMINI_API_KEY not found in environment or .env');
+      _apiKey = 'MISSING_KEY'; 
     }
   }
 
