@@ -16,13 +16,27 @@ class GeminiService {
     print('DEBUG: API Key manually overridden. Length: ${_apiKey.length}');
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('saved_api_key', _apiKey);
-    print('DEBUG: Key saved to local storage.');
+    print('DEBUG: Key saved to a local storage.');
   }
 
   Future<void> _ensureInitialized() async {
-    if (_apiKey.isNotEmpty && _apiKey != 'MISSING_KEY') return; // Already initialized
+    if (_apiKey.isNotEmpty && _apiKey != 'MISSING_KEY') return;
 
-    // Priority 1: Check Local Storage (Manual Override Persistence)
+    // CHANGE: Priority 1 - Check for --dart-define=GEMINI_API_KEY=xxx (The "Official" build key)
+    String envKey = const String.fromEnvironment('GEMINI_API_KEY').trim();
+    
+    // Priority 2: Check for .env file (local testing)
+    if (envKey.isEmpty) {
+      envKey = dotenv.env['GEMINI_API_KEY']?.trim() ?? '';
+    }
+
+    if (envKey.isNotEmpty) {
+      _apiKey = envKey;
+      print('DEBUG: API Key loaded from environment.');
+      return; // Found a valid environment key, stop here.
+    }
+
+    // Priority 3: Check Local Storage (ONLY if no build key exists)
     try {
       final prefs = await SharedPreferences.getInstance();
       final storedKey = prefs.getString('saved_api_key');
@@ -35,21 +49,7 @@ class GeminiService {
       print('WARNING: Internal Storage Check Failed: $e');
     }
 
-    // Priority 2: Check for --dart-define=GEMINI_API_KEY=xxx (Raw key from GitHub)
-    String envKey = const String.fromEnvironment('GEMINI_API_KEY').trim();
-    
-    // Priority 3: Check for .env file (for local testing)
-    if (envKey.isEmpty) {
-      envKey = dotenv.env['GEMINI_API_KEY']?.trim() ?? '';
-    }
-
-    if (envKey.isNotEmpty) {
-      _apiKey = envKey;
-      print('DEBUG: API Key loaded from environment. Starts with: ${_apiKey.substring(0, min(4, _apiKey.length))}');
-    } else {
-      print('WARNING: GEMINI_API_KEY not found in environment or .env');
-      _apiKey = 'MISSING_KEY'; 
-    }
+    _apiKey = 'MISSING_KEY'; 
   }
 
   Future<Map<String, dynamic>> identifyPlant(Uint8List imageBytes, String filename) async {
