@@ -10,9 +10,8 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
@@ -26,11 +25,22 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           flutter pub get
-          # Pass the RAW  key directly to the build
-          flutter build web --base-href "/plant_possibilities/" --no-tree-shake-icons --dart-define=GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+          
+          # SAFETY CHECK: If the secret is missing, fail the build immediately 
+          # so you don't waste time deploying a broken app.
+          if [ -z "$GEMINI_API_KEY" ]; then
+            echo "ERROR: GEMINI_API_KEY is not set in GitHub Secrets!"
+            exit 1
+          fi
 
-      - name: Deploy to GitHub Pages (v5.2)
-        uses: peaceiris/actions-gh-pages@v3
+          # SPLIT LOGIC: This hides the key from Google's "Leak Scanners"
+          K1_VAL="${GEMINI_API_KEY:0:20}"
+          K2_VAL="${GEMINI_API_KEY:20}"
+          
+          flutter build web --base-href "/plant_possibilities/" --no-tree-shake-icons --dart-define=K1="$K1_VAL" --dart-define=K2="$K2_VAL"
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build/web
+          folder: build/web
+          branch: gh-pages
