@@ -80645,7 +80645,7 @@ case 4:s=2
 break
 case 7:k=new A.a1u(n.a,null)
 j=A.aJg("https","generativelanguage.googleapis.com","v1beta",null)
-i=A.aE7("gemini-3-flash")
+i=A.aE7("gemini-1.5-flash")
 h=A.Z(A.c([new A.ie('Identify this plant. Return ONLY JSON: {"commonName": "...", "scientificName": "...", "funFact": "..."}'),new A.H0("image/jpeg",a)],t.Uz),t.z2)
 h=new A.a0t(i,B.GN,null,null,k,j,null,null).a3C(A.c([new A.lb("user",h)],t.kQ),null,null,null,null)
 g=j.gpN()
