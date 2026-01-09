@@ -45,7 +45,7 @@ class GeminiService {
     } catch (_) {}
 
     // Identification Logic (Gemini 3 Flash is the 2026 standard)
-    final model = GenerativeModel(model: 'gemini-3-flash', apiKey: _apiKey);
+    final model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: _apiKey);
     final prompt = 'Identify this plant. Return ONLY JSON: {"commonName": "...", "scientificName": "...", "funFact": "..."}';
     
     final content = [Content.multi([TextPart(prompt), DataPart('image/jpeg', imageBytes)])];
