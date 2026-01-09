@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
-import 'package:flutter/foundation.dart'; // For debugPrint
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -11,49 +10,49 @@ class GeminiService {
 
   GeminiService();
 
+  /// Manually override the key (e.g., via the "Double-Tap" hidden menu)
   Future<void> setApiKey(String key) async {
     _apiKey = key.trim();
-    debugPrint('DEBUG: API Key manually overridden. Length: ${_apiKey.length}');
+    debugPrint('DEBUG: API Key manually overridden.');
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('saved_api_key', _apiKey);
   }
 
   Future<void> _ensureInitialized() async {
+    // If already set and valid, don't re-run
     if (_apiKey.isNotEmpty && _apiKey != 'MISSING_KEY') return;
 
-    // PRIORITY 1: The "Stealth" method (Split keys from deploy.yml)
+    // PRIORITY 1: The "Stealth" method (GitHub Actions / Production)
+    // This bakes the key into the app at build-time using --dart-define
     const String k1 = String.fromEnvironment('K1');
     const String k2 = String.fromEnvironment('K2');
 
     if (k1.isNotEmpty && k2.isNotEmpty) {
       _apiKey = (k1 + k2).trim();
-      debugPrint('DEBUG: API Key reconstructed from stealth environment variables.');
+      debugPrint('DEBUG: Using reconstructed stealth key from build environment.');
       return;
     }
 
-    // PRIORITY 2: Fallback to single environment key (Local development)
-    String envKey = const String.fromEnvironment('GEMINI_API_KEY').trim();
-    if (envKey.isEmpty) {
-      envKey = dotenv.env['GEMINI_API_KEY']?.trim() ?? '';
-    }
-
-    if (envKey.isNotEmpty) {
-      _apiKey = envKey;
-      debugPrint('DEBUG: Using single environment API key.');
-      return;
-    }
-
-    // PRIORITY 3: Local Storage (Manual user entry)
+    // PRIORITY 2: Local Storage Fallback (Manual user entry)
+    // If the user previously used the "Double-Tap" menu, use that key.
     try {
       final prefs = await SharedPreferences.getInstance();
       final storedKey = prefs.getString('saved_api_key');
       if (storedKey != null && storedKey.isNotEmpty) {
         _apiKey = storedKey.trim();
-        debugPrint('DEBUG: Using saved API key from storage.');
+        debugPrint('DEBUG: Using saved API key from device storage.');
         return;
       }
     } catch (e) {
-      debugPrint('WARNING: Internal Storage Check Failed: $e');
+      debugPrint('WARNING: Storage check failed: $e');
+    }
+
+    // PRIORITY 3: Single Env Variable (For local 'flutter run' testing)
+    const String directKey = String.fromEnvironment('GEMINI_API_KEY');
+    if (directKey.isNotEmpty) {
+      _apiKey = directKey.trim();
+      debugPrint('DEBUG: Using direct GEMINI_API_KEY from dart-define.');
+      return;
     }
 
     _apiKey = 'MISSING_KEY';
@@ -63,35 +62,31 @@ class GeminiService {
     await _ensureInitialized();
 
     if (_apiKey == 'MISSING_KEY') {
-      throw Exception('API Key is missing. Please check your GitHub Secrets or local .env file.');
+      throw Exception('API Key Missing. Double-tap the version number to enter a key manually.');
     }
 
-    // 1. Local Lookup
+    // 1. Try Local JSON Cache first
     try {
       final localData = await _loadLocalData(filename);
-      debugPrint('DEBUG: [Local Search] Match found for "$filename"');
       return localData;
-    } catch (e) {
-      debugPrint('DEBUG: [Local Search] No match for "$filename". Calling AI...');
+    } catch (_) {
+      debugPrint('DEBUG: No local match for $filename. Consulting Gemini...');
     }
 
-    // 2. AI Identification with Fallback
+    // 2. AI Identification (Modern 2026 Model List)
     final List<String> modelNames = [
-      'gemini-3-flash',      // 2026 Default
-      'gemini-2.5-flash',    // Stable Fallback
-      'gemini-2.0-flash',    // Legacy Fallback
-      'gemini-flash-latest'  // Alias
+      'gemini-3-flash',      // Highest Priority
+      'gemini-2.5-flash',    // Stable 
+      'gemini-1.5-flash',    // Legacy
     ];
 
     Object? lastError;
 
     for (final modelName in modelNames) {
       try {
-        debugPrint('DEBUG: [Gemini AI] Trying model: $modelName');
         final currentModel = GenerativeModel(model: modelName, apiKey: _apiKey);
-
-        final prompt = 'Identify this plant and return ONLY a JSON object with: '
-            '"commonName", "scientificName", and "funFact". No markdown backticks.';
+        
+        final prompt = 'Identify this plant. Return ONLY JSON: {"commonName": "...", "scientificName": "...", "funFact": "..."}';
 
         final content = [
           Content.multi([
@@ -101,29 +96,27 @@ class GeminiService {
         ];
 
         final response = await currentModel.generateContent(content);
-        final responseText = response.text;
+        final text = response.text;
 
-        if (responseText == null || responseText.isEmpty) continue;
+        if (text == null || text.isEmpty) continue;
 
-        // Clean and Parse JSON
-        String cleanJson = responseText.trim();
+        // Extract JSON block even if model includes markdown
+        String cleanJson = text.trim();
         if (cleanJson.contains('{')) {
           cleanJson = cleanJson.substring(cleanJson.indexOf('{'), cleanJson.lastIndexOf('}') + 1);
         }
 
         return jsonDecode(cleanJson) as Map<String, dynamic>;
       } catch (e) {
-        debugPrint('DEBUG: [Gemini AI] Model $modelName failed: $e');
         lastError = e;
+        debugPrint('DEBUG: Model $modelName failed: $e');
       }
     }
 
-    throw Exception('Identification failed across all models. Last Error: $lastError');
+    throw Exception('All AI models failed. Last Error: $lastError');
   }
 
   Future<Map<String, dynamic>> _loadLocalData(String filename) async {
-    // rootBundle doesn't support query parameters like ?cb=. 
-    // Instead, use cache: false to force a fresh read from the bundle.
     const String assetPath = 'assets/plants/plants_data.json';
     final String response = await rootBundle.loadString(assetPath, cache: false);
     final data = json.decode(response);
@@ -131,6 +124,6 @@ class GeminiService {
     if (data[filename] != null) {
       return data[filename];
     }
-    throw Exception('No local data found');
+    throw Exception('Not in local database');
   }
 }
