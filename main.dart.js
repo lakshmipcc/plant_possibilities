@@ -80615,7 +80615,7 @@ BH(){var s=0,r=A.L(t.H),q,p=this,o
 var $async$BH=A.M(function(a,b){if(a===1)return A.I(b,r)
 for(;;)switch(s){case 0:o=p.a
 if(o.length!==0&&o!=="MISSING_KEY"){s=1
-break}p.a=B.c.k8("AIzaSyBwIGtnLor_8eWbpGOxNUE76Sgj96O6MCU")
+break}p.a=B.c.k8("AIzaSyDog__ckeLXah7axBAStLyDwsrg0EYv3X4")
 A.anY().$1("DEBUG: Using reconstructed stealth key.")
 s=1
 break
