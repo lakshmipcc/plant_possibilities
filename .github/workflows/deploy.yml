@@ -26,18 +26,7 @@ jobs:
 
       - name: Build Web
         run: |
-          # 1. Get the full secret from your GitHub Settings
-          STR="${{ secrets.GEMINI_API_KEY }}"
-          
-          # 2. Split the secret into two pieces as we planned
-          K1_VAL=${STR:0:20}
-          K2_VAL=${STR:20}
-          
-          # 3. Build the app with the base-href and the keys
-          flutter build web --release \
-            --base-href "/${{ github.event.repository.name }}/" \
-            --dart-define=K1=$K1_VAL \
-            --dart-define=K2=$K2_VAL
+          flutter build web --release --base-href "/${{ github.event.repository.name }}/"
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

@@ -1,14 +1,18 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:typed_data';
+import 'firebase_options.dart';
 import 'gemini_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  
   final String sessionID = 'SESSION_${DateTime.now().millisecondsSinceEpoch}';
-  print('DEBUG: App Starting. [$sessionID]');
-  // dotenv.load removal: This caused FormatException on web when file is 404 (parsing 404 HTML as env)
-  print('DEBUG: App Starting. [$sessionID] - Safe Mode v3.7');
+  print('DEBUG: App Starting. [$sessionID] - Secure Cloud Function Mode');
 
   // Global Error Handler for "White Screen of Death"
   ErrorWidget.builder = (FlutterErrorDetails details) {
@@ -22,13 +26,13 @@ void main() async {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline, size: 60, color: Colors.red),
-                  const SizedBox(height: 16),
-                  const Text('Examples of App Crash:', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  Text(details.exceptionAsString(), textAlign: TextAlign.center),
-                  const SizedBox(height: 16),
-                  Text('Stack Trace (Snippet): ${details.stack.toString().split('\n').take(3).join('\n')}', style: const TextStyle(fontSize: 10)),
+                   const Icon(Icons.error_outline, size: 60, color: Colors.red),
+                   const SizedBox(height: 16),
+                   const Text('Examples of App Crash:', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                   const SizedBox(height: 8),
+                   Text(details.exceptionAsString(), textAlign: TextAlign.center),
+                   const SizedBox(height: 16),
+                   Text('Stack Trace (Snippet): ${details.stack.toString().split('\n').take(3).join('\n')}', style: const TextStyle(fontSize: 10)),
                 ],
               ),
             ),
@@ -72,7 +76,7 @@ class PlantPossApp extends StatelessWidget {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Plant Possibilities v2.2',
+      title: 'Plant Possibilities',
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
@@ -113,6 +117,7 @@ class _LandingPageState extends State<LandingPage> {
   final GeminiService _geminiService = GeminiService();
   final ImagePicker _picker = ImagePicker();
   Uint8List? _selectedFileBytes;
+  String? _selectedImageUrl;
   PlantInfo? _plantInfo;
   bool _isLoading = false;
 
@@ -128,9 +133,11 @@ class _LandingPageState extends State<LandingPage> {
       if (image != null) {
         final bytes = await image.readAsBytes();
         final name = image.name;
+        final imageUrl = image.path; // This is the browser's blob URL
 
         setState(() {
           _selectedFileBytes = bytes;
+          _selectedImageUrl = imageUrl;
           _plantInfo = null;
           _isLoading = true;
         });
@@ -164,8 +171,6 @@ class _LandingPageState extends State<LandingPage> {
                           const Divider(),
                           const Text('Debug Info:', style: TextStyle(fontWeight: FontWeight.bold)),
                           Text('Time: ${DateTime.now().toIso8601String()}'),
-                          // Note: We don't have access to the raw key here easily without hacking, 
-                          // but this detailed error might contain the API response "API_KEY_EXPIRED".
                         ],
                       ),
                     ),
@@ -195,52 +200,7 @@ class _LandingPageState extends State<LandingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Column(
-          children: [
-            const Text('Plant Possibilities'),
-            GestureDetector(
-              onDoubleTap: () {
-                TextEditingController keyController = TextEditingController();
-                showDialog(
-                  context: context,
-                  builder: (ctx) => AlertDialog(
-                    title: const Text('Manual Key Override'),
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text('Enter API Key directly to bypass connection issues:'),
-                        TextField(
-                          controller: keyController,
-                          decoration: const InputDecoration(hintText: 'Paste AIza... key here'),
-                        ),
-                      ],
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () async {
-                          if (keyController.text.isNotEmpty) {
-                            await _geminiService.setApiKey(keyController.text);
-                            if (context.mounted) {
-                              Navigator.of(ctx).pop();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Key Saved! It will be remembered on this device.')),
-                              );
-                            }
-                          }
-                        },
-                        child: const Text('Save & Remember'),
-                      ),
-                    ],
-                  ),
-                );
-              },
-              child: Text(
-                'v5.1 (Seamless Python) - ${DateTime.now().toIso8601String().substring(0, 16)}',
-                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal),
-              ),
-            ),
-          ],
-        ),
+        title: const Text('Plant Possibilities'),
         centerTitle: true,
       ),
       body: LayoutBuilder(
@@ -260,28 +220,19 @@ class _LandingPageState extends State<LandingPage> {
                         size: 100,
                         color: Color(0xFF8A9A5B),
                       )
-                    else
-                      Hero(
-                        tag: 'plantImage',
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(24),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.1),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 10),
-                                ),
-                              ],
-                            ),
-                            child: Image.memory(
-                              _selectedFileBytes!,
-                              height: 300,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
+                    else if (_selectedImageUrl != null)
+                      SizedBox(
+                        height: 300,
+                        width: double.infinity,
+                        child: Image.network(
+                          _selectedImageUrl!,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Center(
+                              child: Text('Image Display Error: $error', 
+                                style: const TextStyle(color: Colors.red)),
+                            );
+                          },
                         ),
                       ),
                     const SizedBox(height: 32),
