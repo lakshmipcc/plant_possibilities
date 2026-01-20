@@ -13,7 +13,7 @@ exports.identifyPlant = onCall({ secrets: ["GEMINI_API_KEY"], invoker: "public" 
     // The SDK was failing with 404s, but raw listModels worked. 
     // So we use raw generateContent.
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${apiKey}`;
 
 
 

@@ -1,9 +1,16 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
+import 'dart:convert';
 import 'dart:typed_data';
+import 'dart:ui_web' as ui;
+import 'dart:html' as html;
 import 'firebase_options.dart';
 import 'gemini_service.dart';
+
+// Global registry for the native image factory to pick up
+String? _globalPlantImageUrl;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -121,6 +128,24 @@ class _LandingPageState extends State<LandingPage> {
   PlantInfo? _plantInfo;
   bool _isLoading = false;
 
+  @override
+  void initState() {
+    super.initState();
+    // Register the native HTML image view
+    ui.platformViewRegistry.registerViewFactory(
+      'html-image-view',
+      (int viewId) {
+        final img = html.ImageElement()
+          ..id = 'plant-img-$viewId'
+          ..style.width = '100%'
+          ..style.height = '100%'
+          ..style.objectFit = 'contain'
+          ..src = _globalPlantImageUrl ?? '';
+        return img;
+      },
+    );
+  }
+
   Future<void> _handleImageAction(ImageSource source) async {
     try {
       final XFile? image = await _picker.pickImage(
@@ -138,6 +163,7 @@ class _LandingPageState extends State<LandingPage> {
         setState(() {
           _selectedFileBytes = bytes;
           _selectedImageUrl = imageUrl;
+          _globalPlantImageUrl = imageUrl; // Update global for factory
           _plantInfo = null;
           _isLoading = true;
         });
@@ -220,19 +246,27 @@ class _LandingPageState extends State<LandingPage> {
                         size: 100,
                         color: Color(0xFF8A9A5B),
                       )
-                    else if (_selectedImageUrl != null)
-                      SizedBox(
+                    else
+                      Container(
                         height: 300,
                         width: double.infinity,
-                        child: Image.network(
-                          _selectedImageUrl!,
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Center(
-                              child: Text('Image Display Error: $error', 
-                                style: const TextStyle(color: Colors.red)),
-                            );
-                          },
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(24),
+                          color: const Color(0xFFF5F5F5),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(24),
+                          child: HtmlElementView(
+                            key: ValueKey(_selectedImageUrl ?? _selectedFileBytes.hashCode),
+                            viewType: 'html-image-view',
+                          ),
                         ),
                       ),
                     const SizedBox(height: 32),

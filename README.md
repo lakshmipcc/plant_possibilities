@@ -39,7 +39,14 @@ To keep your key safe, run the app using the `dart-define` flag:
 flutter run -d chrome --dart-define=GEMINI_API_KEY=your_new_key_here
 ```
 
-### 3. Deployment (Advanced Security)
+### 3. Verify Available Models
+To see which Gemini models are accessible with your API key, run this command:
+```bash
+curl -s "https://generativelanguage.googleapis.com/v1beta/models?key=YOUR_API_KEY_HERE" | jq '.models[].name'
+```
+*(Requires `jq` to be installed for readable output)*
+
+### 4. Deployment (Advanced Security)
 Since the public web build contains the API key in the code, automated scanners may flag it as leaked. To prevent this, we use **Base64 Encoding**:
 
 1.  **Encode your Key**:
