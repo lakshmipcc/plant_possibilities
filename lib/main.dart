@@ -12,14 +12,15 @@ import 'gemini_service.dart';
 // Global registry for the native image factory to pick up
 String? _globalPlantImageUrl;
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
   
-  final String sessionID = 'SESSION_${DateTime.now().millisecondsSinceEpoch}';
-  print('DEBUG: App Starting. [$sessionID] - Secure Cloud Function Mode');
+  // Initialize Firebase in background to prevent startup hang on some browsers
+  Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  ).catchError((e) {
+    debugPrint('Firebase Initialization Error: $e');
+  });
 
   // Global Error Handler for "White Screen of Death"
   ErrorWidget.builder = (FlutterErrorDetails details) {
