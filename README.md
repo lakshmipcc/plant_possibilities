@@ -4,10 +4,7 @@ Discover your plant's potential! **Plant Possibilities** is a beautiful, respons
 
 ![Plant Possibilities Header](assets/header.png)
 
-## 🚀 Live Demo
-**Try it here**: [https://lakshmipcc.github.io/plant_possibilities/](https://lakshmipcc.github.io/plant_possibilities/)
 
----
 
 ## 🏗️ How it Works (The "Brain" & "Beauty")
 
