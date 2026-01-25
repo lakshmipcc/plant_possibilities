@@ -3,11 +3,21 @@
     "short_name": "PlantPoss",
     "start_url": ".",
     "display": "standalone",
+    "display_override": [
+        "window-controls-overlay",
+        "minimal-ui"
+    ],
     "background_color": "#F5F5DC",
     "theme_color": "#8A9A5B",
-    "description": "Discover your garden's potential with AI-powered plant identification.",
+    "description": "Identify plants and get care tips powered by Gemini AI. Discover your garden's potential with AI-powered plant identification.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
+    "categories": [
+        "utilities",
+        "education",
+        "lifestyle"
+    ],
+    "lang": "en-US",
     "icons": [
         {
             "src": "icons/Icon-192.png",
