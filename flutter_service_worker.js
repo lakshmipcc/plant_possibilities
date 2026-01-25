@@ -44,7 +44,7 @@ const RESOURCES = {"flutter.js": "24bc71911b75b5f8135c949e27a2984e",
 "canvaskit/canvaskit.js.symbols": "a3c9f77715b642d0437d9c275caba91e",
 "canvaskit/skwasm.js.symbols": "3a4aadf4e8141f284bd524976b1d6bdc",
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
-"flutter_bootstrap.js": "a7cd3f4fd0edd3dce833d91fa4e1a1a8",
+"flutter_bootstrap.js": "51323fa4769a826cd417aadc77beff86",
 "version.json": "4e83c2047748179efbb6aa833ffd2f77",
 "main.dart.js": "1429eb4a970ab31dbb7ddb70ed7f31e8"};
 // The application shell files that are downloaded before a service worker can
