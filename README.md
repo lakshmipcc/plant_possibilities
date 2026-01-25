@@ -1,61 +1,72 @@
 # 🌱 Plant Possibilities (v2.6)
 
-Discover your plant's potential! **Plant Possibilities** is a beautiful, responsive PWA (Progressive Web App) that uses Google's Gemini AI to identify plants from photos and provide interesting botanical facts.
+Discover your plant's potential! **Plant Possibilities** is a beautiful, responsive web app that uses Google's Gemini AI to identify plants from photos and share interesting botanical facts.
 
 ![Plant Possibilities Header](assets/header.png)
 
 ## 🚀 Live Demo
 **Try it here**: [https://lakshmipcc.github.io/plant_possibilities/](https://lakshmipcc.github.io/plant_possibilities/)
 
+---
+
+## 🏗️ How it Works (The "Brain" & "Beauty")
+
+To a novice programmer, this app might look like magic, but it's built on a modern "Secure Server" architecture. Here's the breakdown:
+
+1.  **The Face (Flutter Frontend)**: This is what you see. It's built with **Flutter**, a tool for making pretty apps. It handles the buttons, the camera, and showing you the results.
+2.  **The Brain (Firebase Cloud Functions)**: To keep secret keys safe, we don't put them in the app itself. Instead, the app talks to a secure "Cloud Function" (a piece of code running on Google's servers) which holds the master key.
+3.  **The Expert (Google Gemini AI)**: The Cloud Function talks to Google's AI. Our **Model Negotiator** automatically picks the fastest and smartest AI model available to identify your plant.
+
+---
+
 ## ✨ Features
 
-- **📱 Full PWA Support**: Installable on iPhone and Android. Works as a standalone app without the browser bar.
-- **📸 Live Camera Integration**: Snap a photo directly in the garden for instant identification.
-- **🤖 Multi-Model Fallback**: Sequentially tries `gemini-flash-latest`, `gemini-2.0-flash`, and `gemini-pro-latest` to ensure maximum compatibility.
-- **🔒 Secure Architecture**: API keys are injected via `--dart-define`, keeping your credentials out of the public source code.
-- **🌿 Earth-Toned Design**: A calming UI built with a custom Sage Green, Terracotta, and Cream palette.
+- **📱 App-Like Experience**: Works on iPhone and Android just like a real app (this is called a PWA!).
+- **📸 Snapshot Identification**: Take a photo or upload one from your gallery.
+- **🤖 Smart AI Selection**: Automatically tries different AI versions to make sure you get an answer.
+- **🌿 Beautiful Design**: A calming "Earth-Toned" look using Sage Green and Terracotta.
 
 ## 🛠️ Tech Stack
-- **Framework**: [Flutter](https://flutter.dev) (Web/PWA)
-- **AI Service**: [Google Generative AI](https://pub.dev/packages/google_generative_ai)
-- **Camera**: [image_picker](https://pub.dev/packages/image_picker)
-- **Deployment**: [GitHub Actions](https://github.com/features/actions)
 
-## 📊 Usage & Quotas (Free Tier)
-This app uses the Gemini API Free Tier with the following approximate limits:
-- **Daily Scans**: ~1,500 plants/day (Gemini 1.5 Flash).
-- **Simultaneous Users**: Up to 15 requests per minute.
-- **Cost**: $0.00 (Completely free for personal and hobby use).
+- **Flutter**: The app framework (Dart language).
+- **Firebase**: The secure backend (Node.js/JavaScript).
+- **Google Gemini**: The AI engine.
+- **GitHub Actions**: Automatically deploys the app when we make changes.
+
+---
 
 ## 🚀 Getting Started
 
+If you're a beginner wanting to run this yourself:
+
 ### 1. Prerequisites
-- [Flutter SDK](https://docs.flutter.dev/get-started/install) installed.
-- A Gemini API Key from [Google AI Studio](https://aistudio.google.com/).
+- Install [Flutter](https://docs.flutter.dev/get-started/install).
+- Get a Gemini API Key from [Google AI Studio](https://aistudio.google.com/).
+- Set up a [Firebase Project](https://console.firebase.google.com/).
 
-### 2. Run the App Locally (Secure Method)
-To keep your key safe, run the app using the `dart-define` flag:
+### 2. Local Setup
+1.  **Clone the project** to your computer.
+2.  **Install Firebase Tools**: `npm install -g firebase-tools`
+3.  **Login**: `firebase login`
+4.  **Set your API Key** in Firebase:
+    ```bash
+    firebase functions:secrets:set GEMINI_API_KEY
+    ```
+    (Paste your key when prompted).
+
+### 3. Run Locally
+To run the app on your computer:
 ```bash
-flutter run -d chrome --dart-define=GEMINI_API_KEY=your_new_key_here
+flutter run -d chrome
 ```
 
-### 3. Verify Available Models
-To see which Gemini models are accessible with your API key, run this command:
-```bash
-curl -s "https://generativelanguage.googleapis.com/v1beta/models?key=YOUR_API_KEY_HERE" | jq '.models[].name'
-```
-*(Requires `jq` to be installed for readable output)*
+---
 
-### 4. Deployment (Advanced Security)
-Since the public web build contains the API key in the code, automated scanners may flag it as leaked. To prevent this, we use **Base64 Encoding**:
+## 💡 Novice Corner
 
-1.  **Encode your Key**:
-    Run this in your terminal: `echo -n "YOUR_RAW_API_KEY" | base64`
-2.  **Add to GitHub Secrets**:
-    *   Go to **Settings** -> **Secrets and variables** -> **Actions**.
-    *   Update `GEMINI_API_KEY` with the **Encoded String** (it will end with `=` usually and won't start with `AIza`).
-3.  **Push or Run Workflow**:
-    The app is smart enough to detect the encoded key and decode it automatically!
+- **PWA (Progressive Web App)**: A website that can be "installed" on your home screen and feels like a regular app.
+- **Cloud Function**: A small piece of code that runs "in the cloud" instead of on your device. It's safer for handling private keys.
+- **Dart-Define**: A way to pass information (like a setting) into the app while it's building.
 
 ## 🤝 Contributing
 Feel free to fork this project and add your own plant-tastic features!
